@@ -6,14 +6,15 @@ namespace MarsRoverAssessment
 {
     public class Rover
     {
-        private const char LEFT = 'L';
-        private const char RIGHT = 'R';
-
         public Point Position { get; set; }
         public char Direction { get; set; }
+        private RoverValidation validator;
+        private Plateau Plateau;
 
-        public Rover(string position)
+        public Rover(string position, Plateau plateau)
         {
+            Plateau = plateau;
+            validator = new RoverValidation();
             InitializeRover(position);
         }
 
@@ -21,19 +22,22 @@ namespace MarsRoverAssessment
         {
             string[] values = position.Split(' ');
 
-            if(values.Length != 3)
+            try
             {
-                Console.WriteLine("Invalid Input");
-                Console.ReadKey();
-                return;
-            }
+                int x = Convert.ToInt32(values[0]);
+                int y = Convert.ToInt32(values[1]);
+                char d = Convert.ToChar(values[2].ToUpper());
 
-            int x = Convert.ToInt32(values[0]);
-            int y = Convert.ToInt32(values[1]);
-            char d = Convert.ToChar(values[2].ToUpper());
-            
-            Position = new Point(x, y);
-            Direction = d;
+                if (validator.IsValidPlaceMent(Plateau, new Point(x, y)))
+                {
+                    Position = new Point(x, y);
+                    Direction = d;
+                }
+            }
+            catch(Exception)
+            {
+                validator.OutputError("Invalid Commands");
+            }
         }
 
         public string RoverDestination()
@@ -48,7 +52,7 @@ namespace MarsRoverAssessment
 
             foreach(var command in Commands)
             {
-                if(command.Equals('M'))
+                if(command.Equals(Campass.MOVE))
                     MoveRover();
                 else
                     Direction = ChangeDirection(command);
@@ -60,39 +64,39 @@ namespace MarsRoverAssessment
             //Initialize with default direction
             char updatedDirection = Direction;
 
-            if(letter.Equals(LEFT))
+            if(letter.Equals(Campass.LEFT))
             {
                 switch (Direction)
                 {
-                    case 'N':
-                        updatedDirection = 'W';
+                    case Campass.NORTH:
+                        updatedDirection = Campass.WEST;
                         break;
-                    case 'W':
-                        updatedDirection = 'S';
+                    case Campass.WEST:
+                        updatedDirection = Campass.SOUTH;
                         break;
-                    case 'S':
-                        updatedDirection = 'E';
+                    case Campass.SOUTH:
+                        updatedDirection = Campass.EAST;
                         break;
-                    case 'E':
-                        updatedDirection = 'N';
+                    case Campass.EAST:
+                        updatedDirection = Campass.NORTH;
                         break;
                 }
             }
-            else if(letter.Equals(RIGHT))
+            else if(letter.Equals(Campass.RIGHT))
             {
                 switch (Direction)
                 {
-                    case 'N':
-                        updatedDirection = 'E';
+                    case Campass.NORTH:
+                        updatedDirection = Campass.EAST;
                         break;
-                    case 'E':
-                        updatedDirection = 'S';
+                    case Campass.EAST:
+                        updatedDirection = Campass.SOUTH;
                         break;
-                    case 'S':
-                        updatedDirection = 'W';
+                    case Campass.SOUTH:
+                        updatedDirection = Campass.WEST;
                         break;
-                    case 'W':
-                        updatedDirection = 'N';
+                    case Campass.WEST:
+                        updatedDirection = Campass.NORTH;
                         break;
                 }
             }
@@ -105,17 +109,21 @@ namespace MarsRoverAssessment
             //Move Rover
             switch(Direction)
             {
-                case 'E':
-                    Position.X += 1;
+                case Campass.EAST:
+                    if(validator.IsValidMove(Plateau,new Point(Position.X + 1,Position.Y)))
+                        Position.X += 1;
                     break;
-                case 'N':
-                    Position.Y += 1;
+                case Campass.NORTH:
+                    if (validator.IsValidMove(Plateau, new Point(Position.X, Position.Y + 1)))
+                        Position.Y += 1;
                     break;
-                case 'S':
-                    Position.Y -= 1;
+                case Campass.SOUTH:
+                    if (validator.IsValidMove(Plateau, new Point(Position.X, Position.Y -1)))
+                        Position.Y -= 1;
                     break;
-                case 'W':
-                    Position.X -= 1;
+                case Campass.WEST:
+                    if (validator.IsValidMove(Plateau, new Point(Position.X-1, Position.Y)))
+                        Position.X -= 1;
                     break;
             }
         }
