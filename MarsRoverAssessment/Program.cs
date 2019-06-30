@@ -26,7 +26,7 @@ namespace MarsRoverAssessment
 
                 ProcessRoverInformation(ref instructions,ref position,i);
 
-                Rover rover = new Rover(position);
+                Rover rover = new Rover(position,plateau);
                 rover.Explore(instructions);
 
                 //Add Rover 
@@ -52,6 +52,8 @@ namespace MarsRoverAssessment
             //Input 2 : Process instructions
             Print(string.Format("Enter instructions for Rover {0} ", i + 1));
             instructions = Caputure();
+
+            new RoverValidation().InvalidCommandLength(instructions);
         }
 
         private static string ProcessPlateauInfo()
